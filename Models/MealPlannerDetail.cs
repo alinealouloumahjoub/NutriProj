@@ -11,7 +11,7 @@ public class MealPlannerDetail
     public int IdRcp { get; set; }
 
     public DayOfWeekEnum Day { get; set; }
-    public MealSlot MealSlot { get; set; }
+   // public MealSlot MealSlot { get; set; }
 
     public MealPlanner MealPlanner { get; set; } = null!;
     public Recipe Recipe { get; set; } = null!;
