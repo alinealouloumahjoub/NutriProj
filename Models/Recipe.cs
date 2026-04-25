@@ -24,13 +24,12 @@ public class Recipe
     [Range(0, 1440)]
     public int TimeRest { get; set; }
     // total time will not be stored in the recipe table 
+    //Example: 2 cups of flour => 2 × 120g (GramEquivalent) / 100 × 364 kcal/100g = 873.6 kcal
     [NotMapped]
-
-    public double TotalCalories => RecipeIngredients.Sum(ri => (ri.Quantity / 100.0) * (ri.Ingredient?.CaloriesPer100g ?? 0));
-    
-
+    public double TotalCalories => RecipeIngredients.Sum(ri => (ri.Quantity * (ri.Unit?.GramEquivalent ?? 1) / 100.0) * (ri.Ingredient?.CaloriesPer100g ?? 0));
     public ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
     public ICollection<MealPlannerDetail> MealPlannerDetails { get; set; } = new List<MealPlannerDetail>();
+     public ICollection<RecipeCategory> RecipeCategories { get; set; } = new List<RecipeCategory>();
    
 
 

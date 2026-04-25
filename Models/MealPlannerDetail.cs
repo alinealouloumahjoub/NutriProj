@@ -9,10 +9,9 @@ public class MealPlannerDetail
 
     public int IdPlanner { get; set; }
     public int IdRcp { get; set; }
-
+    public int IdMealSlot { get; set; }  
     public DayOfWeekEnum Day { get; set; }
-   // public MealSlot MealSlot { get; set; }
-
     public MealPlanner MealPlanner { get; set; } = null!;
     public Recipe Recipe { get; set; } = null!;
+    public MealSlot MealSlot { get; set; } = null!;
 }

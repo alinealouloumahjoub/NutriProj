@@ -7,13 +7,11 @@ public class RecipeIngredient
     public int IdRecIng { get; set; }
     public int IdRcp { get; set; }
     public int IdIng { get; set; }
+    public int IdUnit { get; set;}
 
     [Range(0.1, 10000)]
     public double Quantity { get; set; }
-
-    [MaxLength(20)]
-    public string Unit { get; set; } = "g";
-
     public Recipe Recipe { get; set; } = null!;
     public Ingredient Ingredient { get; set; } = null!;
+    public Unit Unit { get; set; } = null!;
 }
