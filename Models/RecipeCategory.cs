@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
- namespace NutriProj.Models;
+namespace NutriProj.Models;
+
 public class RecipeCategory
 {
     [Key]
@@ -8,6 +9,8 @@ public class RecipeCategory
     public int IdRcp { get; set; }
     public int IdMealSlot { get; set; }
 
+    [ForeignKey(nameof(IdRcp))]
     public Recipe Recipe { get; set; } = null!;
+    [ForeignKey(nameof(IdMealSlot))]
     public MealSlot MealSlot { get; set; } = null!;
 }

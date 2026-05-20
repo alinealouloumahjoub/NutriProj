@@ -79,7 +79,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         recipe = await RecipeService.GetRecipeById(Id);
-        desiredPersons = recipe.Servings;
+        if (recipe != null)
+            desiredPersons = recipe.Servings;
     }
 
     private void Calculate()

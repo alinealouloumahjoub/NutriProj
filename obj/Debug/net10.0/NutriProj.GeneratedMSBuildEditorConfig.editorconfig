@@ -38,20 +38,40 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xEYXNoYm9hcmQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/SARRA/NutriProj/Components/Pages/EditRecipe.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFZGl0UmVjaXBlLnJhem9y
+[C:/Users/SARRA/NutriProj/Components/Pages/EditIngredient.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFZGl0SW5ncmVkaWVudC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/SARRA/NutriProj/Components/Pages/Ingredient.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xJbmdyZWRpZW50LnJhem9y
+[C:/Users/SARRA/NutriProj/Components/Pages/EditRecipes.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFZGl0UmVjaXBlcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/SARRA/NutriProj/Components/Pages/Ingredients.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xJbmdyZWRpZW50cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/SARRA/NutriProj/Components/Pages/Inscription.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xJbnNjcmlwdGlvbi5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/SARRA/NutriProj/Components/Pages/Login.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMb2dpbi5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/SARRA/NutriProj/Components/Pages/MealPlanner.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xNZWFsUGxhbm5lci5yYXpvcg==
+[C:/Users/SARRA/NutriProj/Components/Pages/MealPlannerPage.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xNZWFsUGxhbm5lclBhZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/SARRA/NutriProj/Components/Pages/NotFound.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xOb3RGb3VuZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/SARRA/NutriProj/Components/Pages/RecipeDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZWNpcGVEZXRhaWwucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/SARRA/NutriProj/Components/Pages/Recipes.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZWNpcGVzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/SARRA/NutriProj/Components/Pages/ScaleRecipe.razor]

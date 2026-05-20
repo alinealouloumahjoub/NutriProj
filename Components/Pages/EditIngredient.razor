@@ -1,0 +1,95 @@
+@page "/edit-ingredient"
+@page "/edit-ingredient/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@inject IIngredientService IngredientService
+@inject NavigationManager NavigationManager
+
+<h3>@(Id.HasValue ? "Edit Ingredient" : "New Ingredient")</h3>
+
+@if (currentIngredient == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="currentIngredient" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <InputText @bind-Value="currentIngredient.NameIng" class="form-control" />
+            <ValidationMessage For="@(() => currentIngredient.NameIng)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Calories per 100g</label>
+            <InputNumber @bind-Value="currentIngredient.CaloriesPer100g" class="form-control" />
+            <ValidationMessage For="@(() => currentIngredient.CaloriesPer100g)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Image</label>
+            @* InputFile is not in professor's code — needed for picture upload *@
+            <InputFile OnChange="HandleImageUpload" class="form-control" accept="image/*" />
+            @if (!string.IsNullOrEmpty(currentIngredient.ImagePath))
+            {
+                <img src="@currentIngredient.ImagePath" class="mt-2 rounded" style="height:100px;" />
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="/ingredients" class="btn btn-secondary ms-2">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    private Ingredient? currentIngredient;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+            currentIngredient = await IngredientService.GetIngredientById(Id.Value);
+
+        if (currentIngredient == null)
+            currentIngredient = new Ingredient();
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var uploadPath = Path.Combine("wwwroot", "uploads", "ingredients");
+        Directory.CreateDirectory(uploadPath);
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
+        var fullPath = Path.Combine(uploadPath, fileName);
+        await using var stream = new FileStream(fullPath, FileMode.Create);
+        await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+        currentIngredient!.ImagePath = $"/uploads/ingredients/{fileName}";
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (Id.HasValue)
+                await IngredientService.UpdateIngredient(currentIngredient!);
+            else
+                await IngredientService.AddIngredient(currentIngredient!);
+
+            NavigationManager.NavigateTo("/ingredients");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

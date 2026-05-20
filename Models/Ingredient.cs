@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 namespace NutriProj.Models;
+
 public class Ingredient
 {
-
     [Key]
     public int IdIng { get; set; }
 
@@ -11,6 +11,8 @@ public class Ingredient
 
     [Range(0, 9000)]
     public double CaloriesPer100g { get; set; }
+
+    public string? ImagePath { get; set; }
 
     public ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
 }

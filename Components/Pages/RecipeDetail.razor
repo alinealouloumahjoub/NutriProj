@@ -1,0 +1,119 @@
+@page "/recipe/{Id:int}"
+@rendermode InteractiveServer
+@inject IRecipeService RecipeService
+
+@if (currentRecipe == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-5">
+            @if (!string.IsNullOrEmpty(currentRecipe.ImagePath))
+            {
+                <img src="@currentRecipe.ImagePath" class="img-fluid rounded shadow" />
+            }
+            else
+            {
+                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height:300px;">
+                    <i class="bi bi-image text-muted" style="font-size:4rem;"></i>
+                </div>
+            }
+        </div>
+        <div class="col-md-7">
+            <h2>@currentRecipe.RecipeName</h2>
+            <p class="text-muted">
+                <i class="bi bi-globe2"></i> @currentRecipe.TypeKitchen &nbsp;|&nbsp;
+                <i class="bi bi-clock"></i> @currentRecipe.TimePreparation min prep &nbsp;|&nbsp;
+                @currentRecipe.TimeCooking min cook
+            </p>
+
+            <div class="d-flex gap-2 mb-3">
+                @foreach (var cat in currentRecipe.RecipeCategories)
+                {
+                    <span class="badge bg-success fs-6">@cat.MealSlot?.Name</span>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(currentRecipe.Description))
+            {
+                <p>@currentRecipe.Description</p>
+            }
+
+            <div class="row g-2 mb-4">
+                <div class="col">
+                    <div class="card text-white bg-success text-center p-2">
+                        <small>Total Calories</small>
+                        <strong>@ScaledTotalCalories.ToString("F0") kcal</strong>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-white bg-primary text-center p-2">
+                        <small>Per Serving</small>
+                        <strong>@(currentServings > 0 ? (ScaledTotalCalories / currentServings).ToString("F0") : "0") kcal</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center mb-4">
+                <label class="me-3 fw-bold">Servings:</label>
+                <button class="btn btn-outline-secondary" @onclick="Decrement">−</button>
+                <span class="mx-3 fs-5 fw-bold">@currentServings</span>
+                <button class="btn btn-outline-secondary" @onclick="Increment">+</button>
+            </div>
+
+            <h5>Ingredients</h5>
+            <table class="table table-sm table-hover">
+                <thead class="table-light">
+                    <tr><th></th><th>Ingredient</th><th>Quantity</th><th>Unit</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var ri in currentRecipe.RecipeIngredients)
+                    {
+                        var scaledQty = ri.Quantity * currentServings / (double)currentRecipe.Servings;
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(ri.Ingredient?.ImagePath))
+                                {
+                                    <img src="@ri.Ingredient.ImagePath" style="width:32px;height:32px;object-fit:cover;" class="rounded" />
+                                }
+                            </td>
+                            <td>@ri.Ingredient?.NameIng</td>
+                            <td><strong>@scaledQty.ToString("F1")</strong></td>
+                            <td>@ri.Unit?.Name</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <a href="/recipes" class="btn btn-secondary mt-2">
+                <i class="bi bi-arrow-left"></i> Back to Recipes
+            </a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Recipe? currentRecipe;
+    private int currentServings = 4;
+
+    private double ScaledTotalCalories => currentRecipe == null ? 0 :
+        currentRecipe.RecipeIngredients.Sum(ri =>
+            (ri.Quantity * currentServings / (double)currentRecipe.Servings)
+            * (ri.Unit?.GramEquivalent ?? 1) / 100.0
+            * (ri.Ingredient?.CaloriesPer100g ?? 0));
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentRecipe = await RecipeService.GetRecipeById(Id);
+        if (currentRecipe != null)
+            currentServings = currentRecipe.Servings;
+    }
+
+    private void Increment() { if (currentServings < 50) currentServings++; }
+    private void Decrement() { if (currentServings > 1) currentServings--; }
+}

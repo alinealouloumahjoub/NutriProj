@@ -1,0 +1,293 @@
+@page "/edit-recipe"
+@page "/edit-recipe/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+@using NutriProj.Models
+@using NutriProj.Enums
+@using NutriProj.Services_Interfaces
+@inject IRecipeService RecipeService
+@inject IIngredientService IngredientService
+@inject IMealSlotService MealSlotService
+@inject IUnitService UnitService
+@inject IRecipeIngredientService RecipeIngredientService
+@inject NavigationManager NavigationManager
+
+<PageTitle>@(Id.HasValue ? "Edit Recipe" : "Add Recipe")</PageTitle>
+
+<h3>@(Id.HasValue ? "Edit Recipe" : "New Recipe")</h3>
+
+@if (currentRecipe == null)
+{
+    <p><em>Loading form...</em></p>
+}
+else
+{
+    <EditForm Model="currentRecipe" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Recipe Name</label>
+                    <InputText @bind-Value="currentRecipe.RecipeName" class="form-control" />
+                    <ValidationMessage For="@(() => currentRecipe.RecipeName)" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cuisine Type</label>
+                    <InputSelect @bind-Value="currentRecipe.TypeKitchen" class="form-select">
+                        @foreach (var kt in Enum.GetValues<KitchenType>())
+                        {
+                            <option value="@kt">@kt</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Servings</label>
+                    <InputNumber @bind-Value="currentRecipe.Servings" class="form-control" />
+                    <ValidationMessage For="@(() => currentRecipe.Servings)" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Prep Time (min)</label>
+                    <InputNumber @bind-Value="currentRecipe.TimePreparation" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cook Time (min)</label>
+                    <InputNumber @bind-Value="currentRecipe.TimeCooking" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rest Time (min)</label>
+                    <InputNumber @bind-Value="currentRecipe.TimeRest" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image</label>
+                    <InputFile OnChange="HandleImageUpload" class="form-control" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(currentRecipe.ImagePath))
+                    {
+                        <img src="@currentRecipe.ImagePath" class="mt-2 rounded" style="height:80px;" />
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button type="submit" class="btn btn-primary">Save Recipe</button>
+        <a href="/recipes" class="btn btn-secondary ms-2">Cancel</a>
+    </EditForm>
+
+    <hr />
+    <h5>Categories</h5>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+        @foreach (var cat in categories)
+        {
+            <span class="badge bg-success fs-6">
+                @cat.MealSlot?.Name
+                <button type="button" class="btn-close btn-close-white btn-sm ms-1"
+                        @onclick="() => RemoveCategory(cat.IdCategory)"></button>
+            </span>
+        }
+    </div>
+    <div class="d-flex gap-2 mb-4">
+        <select class="form-select w-auto" @bind="selectedSlotId">
+            <option value="0">-- Add meal type --</option>
+            @foreach (var slot in mealSlots)
+            {
+                <option value="@slot.IdMealSlot">@slot.Name</option>
+            }
+        </select>
+        <button class="btn btn-outline-success" @onclick="AddCategory">+ Add</button>
+    </div>
+
+    <hr />
+    <h5>
+        Ingredients
+        <span class="text-success ms-3 fs-6">
+            Total: @CalculateTotalCalories().ToString("F0") kcal |
+            Per serving: @CalculateCaloriesPerServing().ToString("F0") kcal
+        </span>
+    </h5>
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr><th>Ingredient</th><th>Qty</th><th>Unit</th><th>kcal</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var ri in ingredientLines)
+            {
+                <tr>
+                    <td>@ri.Ingredient?.NameIng</td>
+                    <td>@ri.Quantity</td>
+                    <td>@ri.Unit?.Name</td>
+                    <td>@(((ri.Quantity * (ri.Unit?.GramEquivalent ?? 1) / 100.0) * (ri.Ingredient?.CaloriesPer100g ?? 0)).ToString("F0"))</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveIngredient(ri.IdRecIng)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Ingredient</label>
+            <select class="form-select" @bind="newIngredientId">
+                <option value="0">-- Select --</option>
+                @foreach (var ing in allIngredients)
+                {
+                    <option value="@ing.IdIng">@ing.NameIng (@ing.CaloriesPer100g kcal/100g)</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Quantity</label>
+            <input type="number" step="0.1" class="form-control" @bind="newQuantity" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Unit</label>
+            <select class="form-select" @bind="newUnitId">
+                <option value="0">-- Select --</option>
+                @foreach (var u in allUnits)
+                {
+                    <option value="@u.IdUnit">@u.Name (@u.Type)</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-outline-primary w-100" @onclick="AddIngredient">+ Add Ingredient</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ingredientError))
+    {
+        <div class="alert alert-danger">@ingredientError</div>
+    }
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Recipe? currentRecipe;
+    private List<RecipeIngredient> ingredientLines = new();
+    private List<RecipeCategory> categories = new();
+    private List<Ingredient> allIngredients = new();
+    private List<Unit> allUnits = new();
+    private List<MealSlot> mealSlots = new();
+
+    private string? errorMessage;
+    private string? ingredientError;
+    private int selectedSlotId = 0;
+    private int newIngredientId = 0;
+    private double newQuantity = 100;
+    private int newUnitId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allIngredients = await IngredientService.GetAllIngredients();
+        allUnits = await UnitService.GetAllUnits();
+        mealSlots = await MealSlotService.GetAllMealSlots();
+
+        if (Id.HasValue)
+        {
+            currentRecipe = await RecipeService.GetRecipeById(Id.Value);
+            ingredientLines = await RecipeIngredientService.GetByRecipe(Id.Value);
+            categories = await RecipeService.GetCategories(Id.Value);
+        }
+        else
+        {
+            currentRecipe = new Recipe();
+        }
+    }
+
+    private double CalculateTotalCalories() =>
+        ingredientLines.Sum(ri => (ri.Quantity * (ri.Unit?.GramEquivalent ?? 1) / 100.0) * (ri.Ingredient?.CaloriesPer100g ?? 0));
+
+    private double CalculateCaloriesPerServing() =>
+        currentRecipe!.Servings > 0 ? CalculateTotalCalories() / currentRecipe.Servings : 0;
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var uploadPath = Path.Combine("wwwroot", "uploads", "recipes");
+        Directory.CreateDirectory(uploadPath);
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
+        var fullPath = Path.Combine(uploadPath, fileName);
+        await using var stream = new FileStream(fullPath, FileMode.Create);
+        await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+        currentRecipe!.ImagePath = $"/uploads/recipes/{fileName}";
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (Id.HasValue)
+            {
+                await RecipeService.UpdateRecipe(currentRecipe!);
+                NavigationManager.NavigateTo("/recipes");
+            }
+            else
+            {
+                await RecipeService.AddRecipe(currentRecipe!);
+                NavigationManager.NavigateTo($"/edit-recipe/{currentRecipe!.IdRcp}");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task AddIngredient()
+    {
+        try
+        {
+            ingredientError = null;
+            if (newIngredientId == 0 || newUnitId == 0) return;
+            await RecipeIngredientService.Add(Id!.Value, newIngredientId, newQuantity, newUnitId);
+            ingredientLines = await RecipeIngredientService.GetByRecipe(Id.Value);
+            newIngredientId = 0;
+            newQuantity = 100;
+            newUnitId = 0;
+        }
+        catch (Exception ex)
+        {
+            ingredientError = ex.Message;
+        }
+    }
+
+    private async Task RemoveIngredient(int recipeIngredientId)
+    {
+        await RecipeIngredientService.Remove(recipeIngredientId);
+        ingredientLines = await RecipeIngredientService.GetByRecipe(Id!.Value);
+    }
+
+    private async Task AddCategory()
+    {
+        try
+        {
+            ingredientError = null;
+            if (selectedSlotId == 0) return;
+            await RecipeService.AddCategory(Id!.Value, selectedSlotId);
+            categories = await RecipeService.GetCategories(Id.Value);
+            selectedSlotId = 0;
+        }
+        catch (Exception ex)
+        {
+            ingredientError = ex.Message;
+        }
+    }
+
+    private async Task RemoveCategory(int categoryId)
+    {
+        await RecipeService.RemoveCategory(categoryId);
+        categories = await RecipeService.GetCategories(Id!.Value);
+    }
+}

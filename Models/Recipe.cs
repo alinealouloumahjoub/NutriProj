@@ -14,6 +14,11 @@ public class Recipe
 
     public KitchenType TypeKitchen { get; set; }
 
+    [MaxLength(1000)]
+    public string? Description { get; set; }
+
+    public string? ImagePath { get; set; }
+
     [Range(1, 100, ErrorMessage = "Servings must be between 1 and 100")]
     public int Servings { get; set; } = 1;
 

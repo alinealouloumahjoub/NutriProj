@@ -17,4 +17,34 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<RecipeCategory> RecipeCategories { get; set; }
     public DbSet<MealPlanner> MealPlanners { get; set; }
     public DbSet<MealPlannerDetail> MealPlannerDetails { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<RecipeCategory>()
+            .HasOne(rc => rc.Recipe)
+            .WithMany(r => r.RecipeCategories)
+            .HasForeignKey(rc => rc.IdRcp);
+
+        modelBuilder.Entity<RecipeCategory>()
+            .HasOne(rc => rc.MealSlot)
+            .WithMany()
+            .HasForeignKey(rc => rc.IdMealSlot);
+
+        modelBuilder.Entity<MealPlannerDetail>()
+            .HasOne(d => d.Recipe)
+            .WithMany(r => r.MealPlannerDetails)
+            .HasForeignKey(d => d.IdRcp);
+
+        modelBuilder.Entity<MealPlannerDetail>()
+            .HasOne(d => d.MealSlot)
+            .WithMany()
+            .HasForeignKey(d => d.IdMealSlot);
+
+        modelBuilder.Entity<MealPlannerDetail>()
+            .HasOne(d => d.MealPlanner)
+            .WithMany(p => p.Details)
+            .HasForeignKey(d => d.IdPlanner);
+    }
 }

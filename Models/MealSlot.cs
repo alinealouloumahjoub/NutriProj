@@ -7,5 +7,5 @@ public class MealSlot
     public int IdMealSlot { get; set; }
 
     [Required, MaxLength(20)]
-    public string Name { get; set; } 
+    public string Name { get; set; } = string.Empty; 
 }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NutriProj")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+38a484ed290d2f3282b4d0aa5a2799f0c3224470")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+defc424c5fbe84020c45766577ed1110698ad67c")]
 [assembly: System.Reflection.AssemblyProductAttribute("NutriProj")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NutriProj")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -15,7 +15,199 @@ namespace NutriProj.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
 
             modelBuilder.Entity("NutriProj.Models.Ingredient", b =>
                 {
@@ -25,6 +217,9 @@ namespace NutriProj.Migrations
 
                     b.Property<double>("CaloriesPer100g")
                         .HasColumnType("REAL");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NameIng")
                         .IsRequired()
@@ -45,18 +240,13 @@ namespace NutriProj.Migrations
                     b.Property<int>("DailyCaloriesTarget")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("IdUser")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserIdUser")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("WeekStartDate")
                         .HasColumnType("TEXT");
 
                     b.HasKey("IdPlanner");
-
-                    b.HasIndex("UserIdUser");
 
                     b.ToTable("MealPlanners");
                 });
@@ -79,22 +269,13 @@ namespace NutriProj.Migrations
                     b.Property<int>("IdRcp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MealPlannerIdPlanner")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MealSlotIdMealSlot")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RecipeIdRcp")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("IdDetail");
 
-                    b.HasIndex("MealPlannerIdPlanner");
+                    b.HasIndex("IdMealSlot");
 
-                    b.HasIndex("MealSlotIdMealSlot");
+                    b.HasIndex("IdPlanner");
 
-                    b.HasIndex("RecipeIdRcp");
+                    b.HasIndex("IdRcp");
 
                     b.ToTable("MealPlannerDetails");
                 });
@@ -121,10 +302,20 @@ namespace NutriProj.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("RecipeName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Servings")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TimeCooking")
                         .HasColumnType("INTEGER");
@@ -155,17 +346,11 @@ namespace NutriProj.Migrations
                     b.Property<int>("IdRcp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MealSlotIdMealSlot")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RecipeIdRcp")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("IdCategory");
 
-                    b.HasIndex("MealSlotIdMealSlot");
+                    b.HasIndex("IdMealSlot");
 
-                    b.HasIndex("RecipeIdRcp");
+                    b.HasIndex("IdRcp");
 
                     b.ToTable("RecipeCategories");
                 });
@@ -185,25 +370,16 @@ namespace NutriProj.Migrations
                     b.Property<int>("IdUnit")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("IngredientIdIng")
-                        .HasColumnType("INTEGER");
-
                     b.Property<double>("Quantity")
                         .HasColumnType("REAL");
 
-                    b.Property<int>("RecipeIdRcp")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UnitIdUnit")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("IdRecIng");
 
-                    b.HasIndex("IngredientIdIng");
+                    b.HasIndex("IdIng");
 
-                    b.HasIndex("RecipeIdRcp");
+                    b.HasIndex("IdRcp");
 
-                    b.HasIndex("UnitIdUnit");
+                    b.HasIndex("IdUnit");
 
                     b.ToTable("RecipeIngredients");
                 });
@@ -232,57 +408,74 @@ namespace NutriProj.Migrations
                     b.ToTable("Units");
                 });
 
-            modelBuilder.Entity("NutriProj.Models.User", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.Property<int>("IdUser")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("IdUser");
-
-                    b.ToTable("Users");
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("NutriProj.Models.MealPlanner", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("NutriProj.Models.User", "User")
-                        .WithMany("MealPlanners")
-                        .HasForeignKey("UserIdUser")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NutriProj.Models.MealPlannerDetail", b =>
                 {
-                    b.HasOne("NutriProj.Models.MealPlanner", "MealPlanner")
-                        .WithMany("Details")
-                        .HasForeignKey("MealPlannerIdPlanner")
+                    b.HasOne("NutriProj.Models.MealSlot", "MealSlot")
+                        .WithMany()
+                        .HasForeignKey("IdMealSlot")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NutriProj.Models.MealSlot", "MealSlot")
-                        .WithMany()
-                        .HasForeignKey("MealSlotIdMealSlot")
+                    b.HasOne("NutriProj.Models.MealPlanner", "MealPlanner")
+                        .WithMany("Details")
+                        .HasForeignKey("IdPlanner")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NutriProj.Models.Recipe", "Recipe")
                         .WithMany("MealPlannerDetails")
-                        .HasForeignKey("RecipeIdRcp")
+                        .HasForeignKey("IdRcp")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -297,13 +490,13 @@ namespace NutriProj.Migrations
                 {
                     b.HasOne("NutriProj.Models.MealSlot", "MealSlot")
                         .WithMany()
-                        .HasForeignKey("MealSlotIdMealSlot")
+                        .HasForeignKey("IdMealSlot")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NutriProj.Models.Recipe", "Recipe")
                         .WithMany("RecipeCategories")
-                        .HasForeignKey("RecipeIdRcp")
+                        .HasForeignKey("IdRcp")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -316,19 +509,19 @@ namespace NutriProj.Migrations
                 {
                     b.HasOne("NutriProj.Models.Ingredient", "Ingredient")
                         .WithMany("RecipeIngredients")
-                        .HasForeignKey("IngredientIdIng")
+                        .HasForeignKey("IdIng")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NutriProj.Models.Recipe", "Recipe")
                         .WithMany("RecipeIngredients")
-                        .HasForeignKey("RecipeIdRcp")
+                        .HasForeignKey("IdRcp")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NutriProj.Models.Unit", "Unit")
                         .WithMany("RecipeIngredients")
-                        .HasForeignKey("UnitIdUnit")
+                        .HasForeignKey("IdUnit")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -361,11 +554,6 @@ namespace NutriProj.Migrations
             modelBuilder.Entity("NutriProj.Models.Unit", b =>
                 {
                     b.Navigation("RecipeIngredients");
-                });
-
-            modelBuilder.Entity("NutriProj.Models.User", b =>
-                {
-                    b.Navigation("MealPlanners");
                 });
 #pragma warning restore 612, 618
         }
