@@ -1,0 +1,90 @@
+@page "/scale-recipe/{Id:int}"
+@rendermode InteractiveServer
+@using NutriProj.Models
+@using NutriProj.Services_Interfaces
+@inject IRecipeService RecipeService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Scale Recipe</PageTitle>
+
+<h3>Ingredient Scaling</h3>
+
+@if (recipe == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5>@recipe.RecipeName</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Original servings: <strong>@recipe.Servings</strong></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-people-fill"></i></span>
+                        <input type="number" class="form-control" @bind="desiredPersons"
+                               min="1" max="100" placeholder="Desired persons" />
+                        <button class="btn btn-primary" @onclick="Calculate">Scale</button>
+                    </div>
+                </div>
+            </div>
+
+            @if (scaleFactor > 0)
+            {
+                <div class="alert alert-info">
+                    Scale factor: <strong>×@scaleFactor.ToString("F2")</strong> |
+                    Total calories: <strong>@(recipe.TotalCalories * scaleFactor).ToString("F0") kcal</strong> |
+                    Per person: <strong>@(recipe.TotalCalories * scaleFactor / desiredPersons).ToString("F0") kcal</strong>
+                </div>
+
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Ingredient</th>
+                            <th>Original Qty</th>
+                            <th>Scaled Qty</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ri in recipe.RecipeIngredients)
+                        {
+                            <tr>
+                                <td>@ri.Ingredient?.NameIng</td>
+                                <td>@ri.Quantity</td>
+                                <td><strong>@((ri.Quantity * scaleFactor).ToString("F2"))</strong></td>
+                                <td>@ri.Unit?.Name</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+    <a href="/recipes" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Recipes
+    </a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Recipe? recipe;
+    private int desiredPersons = 1;
+    private double scaleFactor = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        recipe = await RecipeService.GetRecipeById(Id);
+        desiredPersons = recipe.Servings;
+    }
+
+    private void Calculate()
+    {
+        if (recipe != null && recipe.Servings > 0 && desiredPersons > 0)
+            scaleFactor = (double)desiredPersons / recipe.Servings;
+    }
+}

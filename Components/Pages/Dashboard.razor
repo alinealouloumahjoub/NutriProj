@@ -1,0 +1,142 @@
+@page "/dashboard"
+@rendermode InteractiveServer
+@using NutriProj.Models
+@using NutriProj.Enums
+@using NutriProj.Services_Interfaces
+@inject IRecipeService RecipeService
+@inject IMealSlotService MealSlotService
+
+<PageTitle>Dashboard</PageTitle>
+
+@* KPI row — same pattern as professor *@
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <KpiCard Title="Total Recipes" Value="@totalRecipes.ToString()"
+                 BackgroundColorClass="bg-primary" IconClass="bi-journal-richtext" />
+    </div>
+    <div class="col-md-3 mb-3">
+        <KpiCard Title="Highest Calories" Value="@($"{highestCal:F0} kcal")"
+                 BackgroundColorClass="bg-danger" IconClass="bi-fire" />
+    </div>
+    <div class="col-md-3 mb-3">
+        <KpiCard Title="Lowest Calories" Value="@($"{lowestCal:F0} kcal")"
+                 BackgroundColorClass="bg-success" IconClass="bi-check-circle" />
+    </div>
+    <div class="col-md-3 mb-3">
+        <KpiCard Title="Average Calories" Value="@($"{averageCal:F0} kcal")"
+                 BackgroundColorClass="bg-warning" IconClass="bi-bullseye" />
+    </div>
+</div>
+
+<div class="row mb-4">
+    @* Chart 1: Recipes by Category *@
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-fill text-primary"></i> Recipes by Category</h5>
+            </div>
+            <div class="card-body">
+                <RadzenChart>
+                    <RadzenColumnSeries Data="@categoryStats" CategoryProperty="Name"
+                                        ValueProperty="Count" Title="Recipes" Fill="#0d6efd" />
+                    <RadzenLegend Visible="false" />
+                </RadzenChart>
+            </div>
+        </div>
+    </div>
+
+    @* Chart 2: Recipes by Cuisine (Donut) *@
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart-fill text-success"></i> Recipes by Cuisine Type</h5>
+            </div>
+            <div class="card-body">
+                <RadzenChart>
+                    <RadzenDonutSeries Data="@cuisineStats" CategoryProperty="Name" ValueProperty="Count">
+                        <TitleTemplate>
+                            <div class="rz-donut-content">
+                                <div>Total</div>
+                                <div>@totalRecipes</div>
+                            </div>
+                        </TitleTemplate>
+                    </RadzenDonutSeries>
+                </RadzenChart>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Top recipes table *@
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Top 5 Highest Calorie Recipes</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr><th>Recipe</th><th>Cuisine</th><th>Servings</th><th>Total kcal</th><th>Per Serving</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in topRecipes)
+                {
+                    <tr>
+                        <td>@r.RecipeName</td>
+                        <td>@r.TypeKitchen</td>
+                        <td>@r.Servings</td>
+                        <td>@r.TotalCalories.ToString("F0")</td>
+                        <td>@r.CaloriesPerServing.ToString("F0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private int totalRecipes = 0;
+    private double highestCal = 0;
+    private double lowestCal = 0;
+    private double averageCal = 0;
+    private List<Recipe> topRecipes = new();
+    private List<StatItem> categoryStats = new();
+    private List<StatItem> cuisineStats = new();
+
+    // Simple stat model (same idea as professor's LocationStat)
+    private class StatItem
+    {
+        public string Name { get; set; } = "";
+        public int Count { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allRecipes = await RecipeService.GetAllRecipes();
+        var allSlots = await MealSlotService.GetAllMealSlots();
+
+        totalRecipes = allRecipes.Count;
+
+        if (allRecipes.Any())
+        {
+            highestCal = allRecipes.Max(r => r.TotalCalories);
+            lowestCal  = allRecipes.Min(r => r.TotalCalories);
+            averageCal = allRecipes.Average(r => r.TotalCalories);
+        }
+
+        topRecipes = allRecipes.OrderByDescending(r => r.TotalCalories).Take(5).ToList();
+
+        // Group by category (MealSlot)
+        categoryStats = allSlots.Select(slot => new StatItem
+        {
+            Name = slot.Name,
+            Count = allRecipes.Count(r => r.RecipeCategories.Any(rc => rc.IdMealSlot == slot.IdMealSlot))
+        }).ToList();
+
+        // Group by cuisine type (same pattern as professor's GroupBy)
+        cuisineStats = allRecipes
+            .GroupBy(r => r.TypeKitchen.ToString())
+            .Select(g => new StatItem { Name = g.Key, Count = g.Count() })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+    }
+}

@@ -14,20 +14,19 @@ public class RecipeService : IRecipeService
         _context = context;
     }
 
-    // this method loads ingredients + unit + categories in one query using SQL JOINs
-    // we create it to avoid multiple DB calls when we need to calculate TotalCalories or display categories
     private IQueryable<Recipe> WithAll()
     {
         return _context.Recipes
-                       .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient) // join Unit for GramEquivalent
-                       .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Unit) //  join RecipeCategory         
-                       .Include(r => r.RecipeCategories).ThenInclude(rc => rc.MealSlot);     //join MealSlot name
+                       .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Ingredient)
+                       .Include(r => r.RecipeIngredients).ThenInclude(ri => ri.Unit)
+                       .Include(r => r.RecipeCategories).ThenInclude(rc => rc.MealSlot);
     }
 
     public async Task<List<Recipe>> GetAllRecipes()
     {
         return await WithAll().OrderBy(r => r.RecipeName).ToListAsync();
     }
+
     public async Task<Recipe> GetRecipeById(int id)
     {
         var recipe = await WithAll().FirstOrDefaultAsync(r => r.IdRcp == id);
@@ -35,6 +34,7 @@ public class RecipeService : IRecipeService
             throw new Exception($"Recipe with id {id} not found");
         return recipe;
     }
+
     public async Task<List<Recipe>> GetByMealSlot(int mealSlotId)
     {
         return await WithAll()
@@ -47,6 +47,34 @@ public class RecipeService : IRecipeService
         return await WithAll()
                      .Where(r => r.TypeKitchen == kitchenType)
                      .ToListAsync();
+    }
+
+    // Dynamic search with LINQ (same pattern as professor's SearchSensorsAsync)
+    public async Task<List<Recipe>> SearchRecipesAsync(string? searchText, KitchenType? kitchenType, int? mealSlotId, double? minCalories, double? maxCalories)
+    {
+        // AsQueryable() prepares a query without executing it
+        IQueryable<Recipe> query = WithAll().AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchText))
+            query = query.Where(r => r.RecipeName.Contains(searchText));
+
+        if (kitchenType.HasValue)
+            query = query.Where(r => r.TypeKitchen == kitchenType.Value);
+
+        if (mealSlotId.HasValue)
+            query = query.Where(r => r.RecipeCategories.Any(rc => rc.IdMealSlot == mealSlotId.Value));
+
+        // SQL executes only here with ToListAsync()
+        var results = await query.OrderBy(r => r.RecipeName).ToListAsync();
+
+        // Calorie filter is done in memory (TotalCalories is [NotMapped])
+        if (minCalories.HasValue)
+            results = results.Where(r => r.TotalCalories >= minCalories.Value).ToList();
+
+        if (maxCalories.HasValue)
+            results = results.Where(r => r.TotalCalories <= maxCalories.Value).ToList();
+
+        return results;
     }
 
     public async Task AddRecipe(Recipe r)
@@ -65,27 +93,26 @@ public class RecipeService : IRecipeService
     {
         var recipe = await _context.Recipes
                                    .Include(r => r.RecipeIngredients)
-                                   .Include(r => r.RecipeCategories) // NEW: remove categories too
+                                   .Include(r => r.RecipeCategories)
                                    .FirstOrDefaultAsync(r => r.IdRcp == id);
         if (recipe == null) return;
 
-        // we need to remove related rows first to avoid foreign key constraint issues
         _context.RecipeIngredients.RemoveRange(recipe.RecipeIngredients);
-        _context.RecipeCategories.RemoveRange(recipe.RecipeCategories); // NEW
+        _context.RecipeCategories.RemoveRange(recipe.RecipeCategories);
         _context.Recipes.Remove(recipe);
         await _context.SaveChangesAsync();
     }
 
-    //we assigned a MealSlot category to a recipe (a recipe can have multiple)
     public async Task AddCategory(int recipeId, int mealSlotId)
     {
-        bool alreadyLinked = await _context.RecipeCategories.AnyAsync(rc => rc.IdRcp == recipeId && rc.IdMealSlot  == mealSlotId);
+        bool alreadyLinked = await _context.RecipeCategories
+            .AnyAsync(rc => rc.IdRcp == recipeId && rc.IdMealSlot == mealSlotId);
         if (alreadyLinked)
             throw new Exception("This recipe already has this category");
 
         _context.RecipeCategories.Add(new RecipeCategory
         {
-            IdRcp= recipeId,
+            IdRcp = recipeId,
             IdMealSlot = mealSlotId
         });
         await _context.SaveChangesAsync();
@@ -95,7 +122,6 @@ public class RecipeService : IRecipeService
     {
         var rc = await _context.RecipeCategories.FindAsync(recipeCategoryId);
         if (rc == null) return;
-
         _context.RecipeCategories.Remove(rc);
         await _context.SaveChangesAsync();
     }
@@ -107,5 +133,4 @@ public class RecipeService : IRecipeService
                              .Where(rc => rc.IdRcp == recipeId)
                              .ToListAsync();
     }
-
 }
