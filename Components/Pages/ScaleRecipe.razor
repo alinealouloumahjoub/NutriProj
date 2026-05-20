@@ -25,9 +25,13 @@ else
                     <label class="form-label">Original servings: <strong>@recipe.Servings</strong></label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-people-fill"></i></span>
-                        <input type="number" class="form-control" @bind="desiredPersons"
-                               min="1" max="100" placeholder="Desired persons" />
-                        <button class="btn btn-primary" @onclick="Calculate">Scale</button>
+                        <input type="number" class="form-control"
+                            @bind="desiredPersons"
+                            @bind:after="Calculate"
+                            min="1" max="100" placeholder="Desired persons" />
+                        <button class="btn btn-primary" @onclick="Calculate">
+                            <i class="bi bi-people-fill"></i> Scale
+                        </button>   
                     </div>
                 </div>
             </div>
@@ -74,18 +78,21 @@ else
 
     private Recipe? recipe;
     private int desiredPersons = 1;
-    private double scaleFactor = 0;
+    private double scaleFactor = 1;
 
     protected override async Task OnInitializedAsync()
     {
         recipe = await RecipeService.GetRecipeById(Id);
         if (recipe != null)
+        {
             desiredPersons = recipe.Servings;
+            Calculate(); // show result immediately on load
+        }
     }
 
     private void Calculate()
     {
         if (recipe != null && recipe.Servings > 0 && desiredPersons > 0)
             scaleFactor = (double)desiredPersons / recipe.Servings;
-    }
+    }   
 }

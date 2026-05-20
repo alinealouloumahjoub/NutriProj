@@ -110,11 +110,19 @@ app.MapRazorComponents<App>()
 // Authentication endpoints (outside WebSocket, same as professor)
 app.MapPost("/api/auth/login", async (
     [FromServices] SignInManager<IdentityUser> signInManager,
+    [FromServices] UserManager<IdentityUser> userManager,
     [FromForm] string email,
     [FromForm] string password) =>
 {
     var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
-    if (result.Succeeded) return Results.Redirect("/ingredients");
+    if (result.Succeeded)
+    {
+        var loggedUser = await userManager.FindByEmailAsync(email);
+        bool isAdmin = await userManager.IsInRoleAsync(loggedUser!, "Admin");
+        return isAdmin
+            ? Results.Redirect("/dashboard")
+            : Results.Redirect("/recipes");
+    }
     return Results.Redirect("/login?error=Invalid+credentials");
 }).DisableAntiforgery();
 

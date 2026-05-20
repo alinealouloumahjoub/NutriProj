@@ -22,6 +22,25 @@
 }
 else
 {
+    @if (showSaveConfirm)
+{
+    <div class="modal show d-block" style="background:rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Save</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to save this recipe?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CancelSave">Cancel</button>
+                    <button class="btn btn-primary" @onclick="ConfirmSave">Yes, save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
     <EditForm Model="currentRecipe" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary class="text-danger" />
@@ -72,13 +91,22 @@ else
             </div>
         </div>
 
+        @* Move this block to just above the Save/Cancel div: *@
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @errorMessage
+            </div>
         }
-
-        <button type="submit" class="btn btn-primary">Save Recipe</button>
-        <a href="/recipes" class="btn btn-secondary ms-2">Cancel</a>
+       <div class="d-flex justify-content-end gap-2 mt-3">
+        <a href="/recipes" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Cancel
+    </a>
+    <button type="button" class="btn btn-primary" @onclick="AskSaveConfirm">
+        <i class="bi bi-check-circle"></i> Save Recipe
+    </button>
+</div>
     </EditForm>
 
     <hr />
@@ -225,56 +253,123 @@ else
     }
 
     private async Task HandleValidSubmit()
+{
+    errorMessage = null;
+
+    // Manual validation for fields not covered by DataAnnotations
+    if (string.IsNullOrWhiteSpace(currentRecipe!.RecipeName))
     {
-        try
+        errorMessage = "Recipe name is required.";
+        return;
+    }
+    if (currentRecipe.Servings <= 0)
+    {
+        errorMessage = "Servings must be at least 1.";
+        return;
+    }
+    if (!Id.HasValue && !ingredientLines.Any())
+    {
+        errorMessage = "Please add at least one ingredient before saving.";
+        return;
+    }
+
+    try
+    {
+        if (Id.HasValue)
         {
-            if (Id.HasValue)
-            {
-                await RecipeService.UpdateRecipe(currentRecipe!);
-                NavigationManager.NavigateTo("/recipes");
-            }
-            else
-            {
-                await RecipeService.AddRecipe(currentRecipe!);
-                NavigationManager.NavigateTo($"/edit-recipe/{currentRecipe!.IdRcp}");
-            }
+            await RecipeService.UpdateRecipe(currentRecipe!);
+            NavigationManager.NavigateTo("/recipes");
         }
-        catch (Exception ex)
+        else
         {
-            errorMessage = ex.Message;
+            await RecipeService.AddRecipe(currentRecipe!);
+            NavigationManager.NavigateTo($"/edit-recipe/{currentRecipe!.IdRcp}");
         }
+    }
+    catch (Exception ex)
+    {
+        errorMessage = ex.Message;
+    }
+}
+    private bool showSaveConfirm = false;
+
+    private void AskSaveConfirm()
+    {
+        showSaveConfirm = true;
+    }
+
+    private async Task ConfirmSave()
+    {
+        showSaveConfirm = false;
+        await HandleValidSubmit();
+    }
+
+    private void CancelSave()
+    {
+        showSaveConfirm = false;
     }
 
     private async Task AddIngredient()
+{
+    try
     {
-        try
+        ingredientError = null;
+        if (newIngredientId == 0 || newUnitId == 0)
         {
-            ingredientError = null;
-            if (newIngredientId == 0 || newUnitId == 0) return;
-            await RecipeIngredientService.Add(Id!.Value, newIngredientId, newQuantity, newUnitId);
-            ingredientLines = await RecipeIngredientService.GetByRecipe(Id.Value);
-            newIngredientId = 0;
-            newQuantity = 100;
-            newUnitId = 0;
+            ingredientError = "Please select an ingredient and a unit.";
+            return;
         }
-        catch (Exception ex)
-        {
-            ingredientError = ex.Message;
-        }
-    }
 
-    private async Task RemoveIngredient(int recipeIngredientId)
-    {
-        await RecipeIngredientService.Remove(recipeIngredientId);
-        ingredientLines = await RecipeIngredientService.GetByRecipe(Id!.Value);
+        // If recipe not saved yet, save it first automatically
+        if (!Id.HasValue)
+        {
+            if (string.IsNullOrWhiteSpace(currentRecipe!.RecipeName))
+            {
+                ingredientError = "Please enter a recipe name before adding ingredients.";
+                return;
+            }
+            await RecipeService.AddRecipe(currentRecipe!);
+            // Redirect to edit page so Id is now set in the URL
+            NavigationManager.NavigateTo($"/edit-recipe/{currentRecipe!.IdRcp}");
+            return;
+        }
+
+        await RecipeIngredientService.Add(Id!.Value, newIngredientId, newQuantity, newUnitId);
+        ingredientLines = await RecipeIngredientService.GetByRecipe(Id.Value);
+        newIngredientId = 0;
+        newQuantity = 100;
+        newUnitId = 0;
     }
+    catch (Exception ex)
+    {
+        ingredientError = ex.Message;
+    }
+}
 
     private async Task AddCategory()
     {
         try
         {
             ingredientError = null;
-            if (selectedSlotId == 0) return;
+            if (selectedSlotId == 0)
+            {
+                ingredientError = "Please select a meal type.";
+                return;
+            }
+
+            // Same: save recipe first if not saved yet
+            if (!Id.HasValue)
+            {
+                if (string.IsNullOrWhiteSpace(currentRecipe!.RecipeName))
+                {
+                    ingredientError = "Please enter a recipe name before adding categories.";
+                    return;
+                }
+                await RecipeService.AddRecipe(currentRecipe!);
+                NavigationManager.NavigateTo($"/edit-recipe/{currentRecipe!.IdRcp}");
+                return;
+            }
+
             await RecipeService.AddCategory(Id!.Value, selectedSlotId);
             categories = await RecipeService.GetCategories(Id.Value);
             selectedSlotId = 0;
@@ -284,7 +379,11 @@ else
             ingredientError = ex.Message;
         }
     }
-
+    private async Task RemoveIngredient(int recipeIngredientId)
+    {
+        await RecipeIngredientService.Remove(recipeIngredientId);
+        ingredientLines = await RecipeIngredientService.GetByRecipe(Id!.Value);
+    }
     private async Task RemoveCategory(int categoryId)
     {
         await RecipeService.RemoveCategory(categoryId);
