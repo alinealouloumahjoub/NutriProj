@@ -107,18 +107,21 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Authentication endpoints (outside WebSocket, same as professor)
+
 app.MapPost("/api/auth/login", async (
     [FromServices] SignInManager<IdentityUser> signInManager,
     [FromServices] UserManager<IdentityUser> userManager,
     [FromForm] string email,
     [FromForm] string password) =>
 {
-    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+    var user = await userManager.FindByEmailAsync(email);
+    if (user == null)
+        return Results.Redirect("/login?error=Invalid+credentials");
+
+    var result = await signInManager.PasswordSignInAsync(user.UserName!, password, isPersistent: false, lockoutOnFailure: false);
     if (result.Succeeded)
     {
-        var loggedUser = await userManager.FindByEmailAsync(email);
-        bool isAdmin = await userManager.IsInRoleAsync(loggedUser!, "Admin");
+        bool isAdmin = await userManager.IsInRoleAsync(user, "Admin");
         return isAdmin
             ? Results.Redirect("/dashboard")
             : Results.Redirect("/recipes");
@@ -132,11 +135,16 @@ app.MapPost("/api/auth/inscription", async (
     [FromForm] string email,
     [FromForm] string password) =>
 {
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(UserName))
+        return Results.Redirect("/inscription?error=All+fields+are+required");
+
     var user = new IdentityUser { UserName = UserName, Email = email };
     var result = await userManager.CreateAsync(user, password);
     if (result.Succeeded)
         return Results.Redirect("/login?success=Account+created");
-    return Results.Redirect("/inscription?error=Registration+failed");
+
+    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+    return Results.Redirect($"/inscription?error={Uri.EscapeDataString(errors)}");
 }).DisableAntiforgery();
 
 app.MapPost("/api/auth/logout", async ([FromServices] SignInManager<IdentityUser> signInManager) =>

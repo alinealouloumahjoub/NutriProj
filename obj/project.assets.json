@@ -2549,24 +2549,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\MSI\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\SARRA\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\MSI\\NutriProj\\NutriProj.csproj",
+      "projectUniqueName": "C:\\Users\\SARRA\\NutriProj\\NutriProj.csproj",
       "projectName": "NutriProj",
-      "projectPath": "C:\\Users\\MSI\\NutriProj\\NutriProj.csproj",
-      "packagesPath": "C:\\Users\\MSI\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\MSI\\NutriProj\\obj\\",
+      "projectPath": "C:\\Users\\SARRA\\NutriProj\\NutriProj.csproj",
+      "packagesPath": "C:\\Users\\SARRA\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\SARRA\\NutriProj\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\MSI\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        "C:\\Users\\SARRA\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
