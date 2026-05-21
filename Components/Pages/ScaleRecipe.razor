@@ -3,79 +3,115 @@
 @using NutriProj.Models
 @using NutriProj.Services_Interfaces
 @inject IRecipeService RecipeService
-@inject NavigationManager NavigationManager
 
-<PageTitle>Scale Recipe</PageTitle>
+<PageTitle>Scale Recipe — GreenPlate</PageTitle>
 
-<h3>Ingredient Scaling</h3>
+<div class="gp-page-header">
+    <div>
+        <h2>Ingredient Scaler</h2>
+        <p>Adjust quantities for any number of persons</p>
+    </div>
+    <a href="/recipes" class="gp-btn gp-btn-outline-gray">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Recipes
+    </a>
+</div>
 
 @if (recipe == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="gp-loading">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="gp-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        Loading recipe...
+    </div>
 }
 else
 {
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h5>@recipe.RecipeName</h5>
+    <div class="gp-card" style="margin-bottom:1.25rem;">
+        <div class="gp-card-header">
+            <h5>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                @recipe.RecipeName
+            </h5>
+            <span style="font-size:0.8rem;color:var(--gp-text-muted);">Original: @recipe.Servings servings</span>
         </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label class="form-label">Original servings: <strong>@recipe.Servings</strong></label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-people-fill"></i></span>
-                        <input type="number" class="form-control"
-                            @bind="desiredPersons"
-                            @bind:after="Calculate"
-                            min="1" max="100" placeholder="Desired persons" />
-                        <button class="btn btn-primary" @onclick="Calculate">
-                            <i class="bi bi-people-fill"></i> Scale
-                        </button>   
-                    </div>
+        <div class="gp-card-body">
+            <div style="display:flex;align-items:flex-end;gap:0.75rem;flex-wrap:wrap;">
+                <div>
+                    <label class="gp-form-label">Number of persons</label>
+                    <input type="number" class="gp-form-control" style="width:140px;"
+                           @bind="desiredPersons" @bind:after="Calculate" min="1" max="100" />
+                </div>
+                <button class="gp-btn gp-btn-green" @onclick="Calculate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    Scale
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (scaleFactor > 0)
+    {
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem;">
+            <div class="gp-kpi gp-kpi-amber">
+                <div class="gp-kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div>
+                    <div class="gp-kpi-label">Scale factor</div>
+                    <div class="gp-kpi-value">×@scaleFactor.ToString("F2")</div>
                 </div>
             </div>
-
-            @if (scaleFactor > 0)
-            {
-                <div class="alert alert-info">
-                    Scale factor: <strong>×@scaleFactor.ToString("F2")</strong> |
-                    Total calories: <strong>@(recipe.TotalCalories * scaleFactor).ToString("F0") kcal</strong> |
-                    Per person: <strong>@(recipe.TotalCalories * scaleFactor / desiredPersons).ToString("F0") kcal</strong>
+            <div class="gp-kpi gp-kpi-red">
+                <div class="gp-kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 6-8 10-8 14a8 8 0 0 0 16 0c0-4-8-8-8-14z"/></svg>
                 </div>
+                <div>
+                    <div class="gp-kpi-label">Total calories</div>
+                    <div class="gp-kpi-value">@((recipe.TotalCalories * scaleFactor).ToString("F0")) kcal</div>
+                </div>
+            </div>
+            <div class="gp-kpi gp-kpi-green">
+                <div class="gp-kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                    <div class="gp-kpi-label">Per person</div>
+                    <div class="gp-kpi-value">@((recipe.TotalCalories * scaleFactor / desiredPersons).ToString("F0")) kcal</div>
+                </div>
+            </div>
+        </div>
 
-                <table class="table table-striped">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Ingredient</th>
-                            <th>Original Qty</th>
-                            <th>Scaled Qty</th>
-                            <th>Unit</th>
-                        </tr>
+        <div class="gp-card">
+            <div class="gp-card-header">
+                <h5>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2l1.5 14.5L12 22l7.5-5.5L21 2"/></svg>
+                    Scaled Ingredients
+                </h5>
+            </div>
+            <div class="gp-card-body" style="padding:0;">
+                <table class="gp-table">
+                    <thead>
+                        <tr><th>Ingredient</th><th>Original</th><th>Scaled</th><th>Unit</th></tr>
                     </thead>
                     <tbody>
                         @foreach (var ri in recipe.RecipeIngredients)
                         {
                             <tr>
-                                <td>@ri.Ingredient?.NameIng</td>
-                                <td>@ri.Quantity</td>
-                                <td><strong>@((ri.Quantity * scaleFactor).ToString("F2"))</strong></td>
-                                <td>@ri.Unit?.Name</td>
+                                <td style="font-weight:500;color:var(--gp-text-dark);">@ri.Ingredient?.NameIng</td>
+                                <td style="color:var(--gp-text-muted);">@ri.Quantity</td>
+                                <td><strong style="color:var(--gp-green);">@((ri.Quantity * scaleFactor).ToString("F2"))</strong></td>
+                                <td><span class="gp-badge gp-badge-gray">@ri.Unit?.Name</span></td>
                             </tr>
                         }
                     </tbody>
                 </table>
-            }
+            </div>
         </div>
-    </div>
-    <a href="/recipes" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Back to Recipes
-    </a>
+    }
 }
 
 @code {
     [Parameter] public int Id { get; set; }
-
     private Recipe? recipe;
     private int desiredPersons = 1;
     private double scaleFactor = 1;
@@ -83,16 +119,12 @@ else
     protected override async Task OnInitializedAsync()
     {
         recipe = await RecipeService.GetRecipeById(Id);
-        if (recipe != null)
-        {
-            desiredPersons = recipe.Servings;
-            Calculate(); // show result immediately on load
-        }
+        if (recipe != null) { desiredPersons = recipe.Servings; Calculate(); }
     }
 
     private void Calculate()
     {
         if (recipe != null && recipe.Servings > 0 && desiredPersons > 0)
             scaleFactor = (double)desiredPersons / recipe.Servings;
-    }   
+    }
 }

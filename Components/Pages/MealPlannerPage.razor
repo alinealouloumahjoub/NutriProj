@@ -10,30 +10,45 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
-<PageTitle>Meal Planner</PageTitle>
+<PageTitle>Meal Planner — GreenPlate</PageTitle>
 
-<h1>Meal Planner</h1>
+<div class="gp-page-header">
+    <div>
+        <h2>Meal Planner</h2>
+        <p>Plan your week, track your calories</p>
+    </div>
+</div>
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger">@errorMessage</div>
+    <div class="gp-alert gp-alert-danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        @errorMessage
+    </div>
 }
 
-@* Step 1: Week setup *@
-<div class="card shadow-sm mb-4">
-    <div class="card-header">Week Plan Setup</div>
-    <div class="card-body">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">Week starting (Monday)</label>
-                <input type="date" class="form-control" @bind="weekStartDate" />
+<div class="gp-card" style="margin-bottom:1.25rem;">
+    <div class="gp-card-header">
+        <h5>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Week Setup
+        </h5>
+    </div>
+    <div class="gp-card-body">
+        <div style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+                <label class="gp-form-label">Week starting (Monday)</label>
+                <input type="date" class="gp-form-control" @bind="weekStartDate" />
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Daily calorie target</label>
-                <input type="number" class="form-control" @bind="dailyCalTarget" min="500" max="5000" />
+            <div style="flex:1;min-width:150px;">
+                <label class="gp-form-label">Daily calorie target</label>
+                <input type="number" class="gp-form-control" @bind="dailyCalTarget" min="500" max="5000" />
             </div>
-            <div class="col-md-2">
-                <button class="btn btn-primary" @onclick="LoadOrCreatePlan">Load / Create</button>
+            <div>
+                <button class="gp-btn gp-btn-green" @onclick="LoadOrCreatePlan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Load / Create
+                </button>
             </div>
         </div>
     </div>
@@ -41,29 +56,36 @@
 
 @if (currentPlan != null)
 {
-    @* Step 2: Add a meal to a specific slot *@
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">Add Meal to Plan</div>
-        <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-2">
-                    <select class="form-select" @bind="selectedDay">
+    <div class="gp-card" style="margin-bottom:1.25rem;">
+        <div class="gp-card-header">
+            <h5>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Meal
+            </h5>
+        </div>
+        <div class="gp-card-body">
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+                <div>
+                    <label class="gp-form-label">Day</label>
+                    <select class="gp-form-control gp-select" @bind="selectedDay" style="width:130px;">
                         @foreach (var day in Enum.GetValues<DayOfWeekEnum>())
                         {
                             <option value="@day">@day</option>
                         }
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" @bind="selectedSlotId">
+                <div>
+                    <label class="gp-form-label">Meal slot</label>
+                    <select class="gp-form-control gp-select" @bind="selectedSlotId" style="width:140px;">
                         @foreach (var slot in mealSlots)
                         {
                             <option value="@slot.IdMealSlot">@slot.Name</option>
                         }
                     </select>
                 </div>
-                <div class="col-md-5">
-                    <select class="form-select" @bind="selectedRecipeId">
+                <div style="flex:1;min-width:220px;">
+                    <label class="gp-form-label">Recipe</label>
+                    <select class="gp-form-control gp-select" @bind="selectedRecipeId">
                         <option value="0">-- Select recipe --</option>
                         @foreach (var r in allRecipes)
                         {
@@ -71,73 +93,71 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-success w-100" @onclick="AddMeal">Add</button>
+                <div>
+                    <button class="gp-btn gp-btn-green" @onclick="AddMeal">Add meal</button>
                 </div>
             </div>
         </div>
     </div>
 
-    @* Step 3: Weekly grid view *@
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            Weekly Overview — Week of @currentPlan.WeekStartDate.ToString("dd MMM yyyy")
-            <span class="float-end">
-                Total: <strong>@weekTotalCal.ToString("F0") kcal</strong> |
-                Target: <strong>@(currentPlan.DailyCaloriesTarget * 7) kcal</strong>
-            </span>
+    <div class="gp-card">
+        <div class="gp-card-header">
+            <h5>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Week of @currentPlan.WeekStartDate.ToString("dd MMM yyyy")
+            </h5>
+            <div style="display:flex;gap:1rem;font-size:0.85rem;color:var(--gp-text-muted);">
+                <span>Total: <strong style="color:var(--gp-text-dark);">@weekTotalCal.ToString("F0") kcal</strong></span>
+                <span>Target: <strong style="color:var(--gp-text-dark);">@(currentPlan.DailyCaloriesTarget * 7) kcal</strong></span>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered text-center">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Meal</th>
-                            @foreach (var day in Enum.GetValues<DayOfWeekEnum>())
-                            {
-                                <th>@day</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var slot in mealSlots)
+        <div class="gp-card-body" style="padding:0;overflow-x:auto;">
+            <table class="gp-table" style="min-width:700px;">
+                <thead>
+                    <tr>
+                        <th style="width:100px;">Meal</th>
+                        @foreach (var day in Enum.GetValues<DayOfWeekEnum>())
                         {
-                            <tr>
-                                <td class="fw-bold">@slot.Name</td>
-                                @foreach (var day in Enum.GetValues<DayOfWeekEnum>())
-                                {
-                                    var detail = weekDetails.FirstOrDefault(d => d.Day == day && d.IdMealSlot == slot.IdMealSlot);
-                                    <td>
-                                        @if (detail != null)
-                                        {
-                                            <span class="badge bg-success">@detail.Recipe?.RecipeName</span>
-                                            <br />
-                                            <small class="text-muted">@detail.Recipe?.TotalCalories.ToString("F0") kcal</small>
-                                            <br />
-                                            <button class="btn btn-sm btn-outline-danger mt-1"
-                                                    @onclick="() => RemoveMeal(detail.IdDetail)">
-                                                <i class="bi bi-x"></i>
-                                            </button>
-                                        }
-                                    </td>
-                                }
-                            </tr>
+                            <th style="text-align:center;">@day</th>
                         }
-                        <tr class="table-light fw-bold">
-                            <td>Total kcal</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var slot in mealSlots)
+                    {
+                        <tr>
+                            <td style="font-weight:600;color:var(--gp-text-dark);">@slot.Name</td>
                             @foreach (var day in Enum.GetValues<DayOfWeekEnum>())
                             {
-                                var dayTotal = weekDetails
-                                    .Where(d => d.Day == day)
-                                    .Sum(d => d.Recipe?.TotalCalories ?? 0);
-                                <td class="@(dayTotal > currentPlan.DailyCaloriesTarget ? "text-danger" : "text-success")">
-                                    @dayTotal.ToString("F0")
+                                var detail = weekDetails.FirstOrDefault(d => d.Day == day && d.IdMealSlot == slot.IdMealSlot);
+                                <td style="text-align:center;vertical-align:middle;">
+                                    @if (detail != null)
+                                    {
+                                        <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                                            <span class="gp-badge gp-badge-green">@detail.Recipe?.RecipeName</span>
+                                            <span style="font-size:0.75rem;color:var(--gp-text-muted);">@detail.Recipe?.TotalCalories.ToString("F0") kcal</span>
+                                            <button class="gp-btn gp-btn-outline-red" style="padding:0.2rem 0.5rem;font-size:0.75rem;"
+                                                    @onclick="() => RemoveMeal(detail.IdDetail)">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                            </button>
+                                        </div>
+                                    }
                                 </td>
                             }
                         </tr>
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    <tr style="background:var(--gp-green-light);">
+                        <td style="font-weight:600;color:var(--gp-text-dark);">Total kcal</td>
+                        @foreach (var day in Enum.GetValues<DayOfWeekEnum>())
+                        {
+                            var dayTotal = weekDetails.Where(d => d.Day == day).Sum(d => d.Recipe?.TotalCalories ?? 0);
+                            <td style="text-align:center;font-weight:600;color:@(dayTotal > currentPlan.DailyCaloriesTarget ? "var(--gp-danger)" : "var(--gp-green)");">
+                                @dayTotal.ToString("F0")
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 }
@@ -149,7 +169,6 @@
     private List<Recipe> allRecipes = new();
     private string? errorMessage;
     private string? userId;
-
     private DateOnly weekStartDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + 1));
     private int dailyCalTarget = 2000;
     private DayOfWeekEnum selectedDay = DayOfWeekEnum.Monday;
@@ -161,50 +180,35 @@
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        mealSlots = await MealSlotService.GetAllMealSlots();
+        mealSlots  = await MealSlotService.GetAllMealSlots();
         allRecipes = await RecipeService.GetAllRecipes();
-
         if (mealSlots.Any()) selectedSlotId = mealSlots.First().IdMealSlot;
     }
 
     private async Task LoadOrCreatePlan()
     {
         if (userId == null) { errorMessage = "Please log in first."; return; }
-        try
-        {
-            currentPlan = await MealPlannerService.GetOrCreateWeekPlan(userId, weekStartDate, dailyCalTarget);
-            await RefreshWeekDetails();
-        }
+        try { currentPlan = await MealPlannerService.GetOrCreateWeekPlan(userId, weekStartDate, dailyCalTarget); await RefreshWeekDetails(); }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private async Task RefreshWeekDetails()
     {
         if (currentPlan == null) return;
-        weekDetails = await MealPlannerService.GetWeekDetails(currentPlan.IdPlanner);
+        weekDetails  = await MealPlannerService.GetWeekDetails(currentPlan.IdPlanner);
         weekTotalCal = await MealPlannerService.GetWeekTotalCalories(currentPlan.IdPlanner);
     }
 
     private async Task AddMeal()
     {
         if (currentPlan == null || selectedRecipeId == 0) return;
-        try
-        {
-            await MealPlannerService.AddDetail(currentPlan.IdPlanner, selectedRecipeId, selectedDay, selectedSlotId);
-            await RefreshWeekDetails();
-            selectedRecipeId = 0;
-        }
+        try { await MealPlannerService.AddDetail(currentPlan.IdPlanner, selectedRecipeId, selectedDay, selectedSlotId); await RefreshWeekDetails(); selectedRecipeId = 0; }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private async Task RemoveMeal(int detailId)
     {
-        try
-        {
-            await MealPlannerService.RemoveDetail(detailId);
-            await RefreshWeekDetails();
-        }
+        try { await MealPlannerService.RemoveDetail(detailId); await RefreshWeekDetails(); }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 }

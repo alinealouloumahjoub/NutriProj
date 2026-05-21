@@ -614,7 +614,6 @@ C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\r9w1mufl9l-{0}-4vyp0a2xjt-4v
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\i1901ftr2x-{0}-cjvtifvnlk-cjvtifvnlk.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\6xb9o06z95-{0}-nxs3tbu78o-nxs3tbu78o.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\t2tvocn0z4-{0}-fsn0r9fawc-fsn0r9fawc.gz
-C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\derrgrpcey-{0}-khy4lop6wu-khy4lop6wu.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\vvpd3q9arw-{0}-t1cqhe9u97-t1cqhe9u97.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\na6xtqezqh-{0}-c2jlpeoesf-c2jlpeoesf.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\hnw520610m-{0}-sejl45xvog-sejl45xvog.gz
@@ -662,8 +661,6 @@ C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\fevd9ylsav-{0}-0j3bgjxly4-0j
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\tew5buxg2j-{0}-abdmv1u4y3-abdmv1u4y3.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\lyiw3laoqa-{0}-2i0r6wwb69-2i0r6wwb69.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\eedo7h8yct-{0}-iz83ucvm53-iz83ucvm53.gz
-C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\xo5sbcuexp-{0}-hloow1d5g7-hloow1d5g7.gz
-C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\epkn191a34-{0}-hloow1d5g7-hloow1d5g7.gz
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\staticwebassets.build.json
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\staticwebassets.build.json.cache
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\staticwebassets.development.json
@@ -675,3 +672,7 @@ C:\Users\MSI\NutriProj\obj\Debug\net10.0\refint\NutriProj.dll
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\NutriProj.pdb
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\NutriProj.genruntimeconfig.cache
 C:\Users\MSI\NutriProj\obj\Debug\net10.0\ref\NutriProj.dll
+C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\xo5sbcuexp-{0}-7sbbx4xg42-7sbbx4xg42.gz
+C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\epkn191a34-{0}-7sbbx4xg42-7sbbx4xg42.gz
+C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\lgwj191b4e-{0}-t34ou7e5oh-t34ou7e5oh.gz
+C:\Users\MSI\NutriProj\obj\Debug\net10.0\compressed\derrgrpcey-{0}-g95el0645g-g95el0645g.gz

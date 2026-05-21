@@ -6,86 +6,109 @@
 @inject IRecipeService RecipeService
 @inject IMealSlotService MealSlotService
 
-<PageTitle>Dashboard</PageTitle>
+<PageTitle>Dashboard — GreenPlate</PageTitle>
 
-@* KPI row — same pattern as professor *@
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <KpiCard Title="Total Recipes" Value="@totalRecipes.ToString()"
-                 BackgroundColorClass="bg-primary" IconClass="bi-journal-richtext" />
-    </div>
-    <div class="col-md-3 mb-3">
-        <KpiCard Title="Highest Calories" Value="@($"{highestCal:F0} kcal")"
-                 BackgroundColorClass="bg-danger" IconClass="bi-fire" />
-    </div>
-    <div class="col-md-3 mb-3">
-        <KpiCard Title="Lowest Calories" Value="@($"{lowestCal:F0} kcal")"
-                 BackgroundColorClass="bg-success" IconClass="bi-check-circle" />
-    </div>
-    <div class="col-md-3 mb-3">
-        <KpiCard Title="Average Calories" Value="@($"{averageCal:F0} kcal")"
-                 BackgroundColorClass="bg-warning" IconClass="bi-bullseye" />
+<HeadContent>
+    <style>
+        .gp-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:1.75rem; }
+        .gp-charts-row { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.75rem; }
+        @@media(max-width:900px){ .gp-kpi-row{grid-template-columns:repeat(2,1fr);} .gp-charts-row{grid-template-columns:1fr;} }
+        @@media(max-width:560px){ .gp-kpi-row{grid-template-columns:1fr;} }
+    </style>
+</HeadContent>
+
+<div class="gp-page-header">
+    <div>
+        <h2>Dashboard</h2>
+        <p>Overview of your recipe database and nutrition stats</p>
     </div>
 </div>
 
-<div class="row mb-4">
-    @* Chart 1: Recipes by Category *@
-    <div class="col-md-6">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-bar-chart-fill text-primary"></i> Recipes by Category</h5>
-            </div>
-            <div class="card-body">
-                <RadzenChart>
-                    <RadzenColumnSeries Data="@categoryStats" CategoryProperty="Name"
-                                        ValueProperty="Count" Title="Recipes" Fill="#0d6efd" />
-                    <RadzenLegend Visible="false" />
-                </RadzenChart>
-            </div>
+<div class="gp-kpi-row">
+    <div class="gp-kpi gp-kpi-green">
+        <div class="gp-kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <div><div class="gp-kpi-label">Total Recipes</div><div class="gp-kpi-value">@totalRecipes</div></div>
+    </div>
+    <div class="gp-kpi gp-kpi-red">
+        <div class="gp-kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 6-8 10-8 14a8 8 0 0 0 16 0c0-4-8-8-8-14z"/></svg>
+        </div>
+        <div><div class="gp-kpi-label">Highest Calories</div><div class="gp-kpi-value">@highestCal.ToString("F0") kcal</div></div>
+    </div>
+    <div class="gp-kpi gp-kpi-green">
+        <div class="gp-kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div><div class="gp-kpi-label">Lowest Calories</div><div class="gp-kpi-value">@lowestCal.ToString("F0") kcal</div></div>
+    </div>
+    <div class="gp-kpi gp-kpi-amber">
+        <div class="gp-kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div><div class="gp-kpi-label">Avg. Calories</div><div class="gp-kpi-value">@averageCal.ToString("F0") kcal</div></div>
+    </div>
+</div>
+
+<div class="gp-charts-row">
+    <div class="gp-card">
+        <div class="gp-card-header">
+            <h5>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Recipes by Category
+            </h5>
+        </div>
+        <div class="gp-card-body">
+            <RadzenChart>
+                <RadzenColumnSeries Data="@categoryStats" CategoryProperty="Name" ValueProperty="Count" Title="Recipes" Fill="#2d8653" />
+                <RadzenLegend Visible="false" />
+            </RadzenChart>
         </div>
     </div>
-
-    @* Chart 2: Recipes by Cuisine (Donut) *@
-    <div class="col-md-6">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-pie-chart-fill text-success"></i> Recipes by Cuisine Type</h5>
-            </div>
-            <div class="card-body">
-                <RadzenChart>
-                    <RadzenDonutSeries Data="@cuisineStats" CategoryProperty="Name" ValueProperty="Count">
-                        <TitleTemplate>
-                            <div class="rz-donut-content">
-                                <div>Total</div>
-                                <div>@totalRecipes</div>
-                            </div>
-                        </TitleTemplate>
-                    </RadzenDonutSeries>
-                </RadzenChart>
-            </div>
+    <div class="gp-card">
+        <div class="gp-card-header">
+            <h5>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Recipes by Cuisine
+            </h5>
+        </div>
+        <div class="gp-card-body">
+            <RadzenChart>
+                <RadzenDonutSeries Data="@cuisineStats" CategoryProperty="Name" ValueProperty="Count">
+                    <TitleTemplate>
+                        <div class="rz-donut-content">
+                            <div style="font-size:0.75rem;color:#6b7c72;">Total</div>
+                            <div style="font-size:1.5rem;font-weight:700;color:#1a2e20;font-family:'Playfair Display',serif;">@totalRecipes</div>
+                        </div>
+                    </TitleTemplate>
+                </RadzenDonutSeries>
+            </RadzenChart>
         </div>
     </div>
 </div>
 
-@* Top recipes table *@
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-white">
-        <h5 class="mb-0"><i class="bi bi-trophy-fill text-warning"></i> Top 5 Highest Calorie Recipes</h5>
+<div class="gp-card">
+    <div class="gp-card-header">
+        <h5>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Top 5 Highest Calorie Recipes
+        </h5>
     </div>
-    <div class="card-body">
-        <table class="table table-striped">
-            <thead class="table-dark">
+    <div class="gp-card-body" style="padding:0;">
+        <table class="gp-table">
+            <thead>
                 <tr><th>Recipe</th><th>Cuisine</th><th>Servings</th><th>Total kcal</th><th>Per Serving</th></tr>
             </thead>
             <tbody>
                 @foreach (var r in topRecipes)
                 {
                     <tr>
-                        <td>@r.RecipeName</td>
-                        <td>@r.TypeKitchen</td>
+                        <td style="font-weight:500;color:var(--gp-text-dark);">@r.RecipeName</td>
+                        <td><span class="gp-badge gp-badge-blue">@r.TypeKitchen</span></td>
                         <td>@r.Servings</td>
-                        <td>@r.TotalCalories.ToString("F0")</td>
-                        <td>@r.CaloriesPerServing.ToString("F0")</td>
+                        <td style="font-weight:600;color:var(--gp-danger);">@r.TotalCalories.ToString("F0")</td>
+                        <td style="color:var(--gp-text-muted);">@r.CaloriesPerServing.ToString("F0")</td>
                     </tr>
                 }
             </tbody>
@@ -94,49 +117,20 @@
 </div>
 
 @code {
-    private int totalRecipes = 0;
-    private double highestCal = 0;
-    private double lowestCal = 0;
-    private double averageCal = 0;
+    private int totalRecipes;
+    private double highestCal, lowestCal, averageCal;
     private List<Recipe> topRecipes = new();
-    private List<StatItem> categoryStats = new();
-    private List<StatItem> cuisineStats = new();
-
-    // Simple stat model (same idea as professor's LocationStat)
-    private class StatItem
-    {
-        public string Name { get; set; } = "";
-        public int Count { get; set; }
-    }
+    private List<StatItem> categoryStats = new(), cuisineStats = new();
+    private class StatItem { public string Name { get; set; } = ""; public int Count { get; set; } }
 
     protected override async Task OnInitializedAsync()
     {
-        var allRecipes = await RecipeService.GetAllRecipes();
-        var allSlots = await MealSlotService.GetAllMealSlots();
-
-        totalRecipes = allRecipes.Count;
-
-        if (allRecipes.Any())
-        {
-            highestCal = allRecipes.Max(r => r.TotalCalories);
-            lowestCal  = allRecipes.Min(r => r.TotalCalories);
-            averageCal = allRecipes.Average(r => r.TotalCalories);
-        }
-
-        topRecipes = allRecipes.OrderByDescending(r => r.TotalCalories).Take(5).ToList();
-
-        // Group by category (MealSlot)
-        categoryStats = allSlots.Select(slot => new StatItem
-        {
-            Name = slot.Name,
-            Count = allRecipes.Count(r => r.RecipeCategories.Any(rc => rc.IdMealSlot == slot.IdMealSlot))
-        }).ToList();
-
-        // Group by cuisine type (same pattern as professor's GroupBy)
-        cuisineStats = allRecipes
-            .GroupBy(r => r.TypeKitchen.ToString())
-            .Select(g => new StatItem { Name = g.Key, Count = g.Count() })
-            .OrderByDescending(s => s.Count)
-            .ToList();
+        var all   = await RecipeService.GetAllRecipes();
+        var slots = await MealSlotService.GetAllMealSlots();
+        totalRecipes = all.Count;
+        if (all.Any()) { highestCal = all.Max(r=>r.TotalCalories); lowestCal = all.Min(r=>r.TotalCalories); averageCal = all.Average(r=>r.TotalCalories); }
+        topRecipes    = all.OrderByDescending(r=>r.TotalCalories).Take(5).ToList();
+        categoryStats = slots.Select(s => new StatItem { Name=s.Name, Count=all.Count(r=>r.RecipeCategories.Any(rc=>rc.IdMealSlot==s.IdMealSlot)) }).ToList();
+        cuisineStats  = all.GroupBy(r=>r.TypeKitchen.ToString()).Select(g=>new StatItem{Name=g.Key,Count=g.Count()}).OrderByDescending(s=>s.Count).ToList();
     }
 }

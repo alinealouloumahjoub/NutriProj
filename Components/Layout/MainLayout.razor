@@ -1,28 +1,42 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
+<div class="gp-page">
+    <div class="gp-sidebar">
         <NavMenu />
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <AuthorizeView Context="authState">
-                <Authorized>
-                    <span class="me-3">👤 @authState.User.Identity?.Name</span>
-                    <form method="post" action="/api/auth/logout" data-enhance="false" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-outline-primary">Logout</button>
-                    </form>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/login" class="btn btn-primary btn-sm">Log in</a>
-                    <a href="/inscription" class="btn btn-secondary btn-sm ms-2">Sign up</a>
-                </NotAuthorized>
-            </AuthorizeView>
+    <main class="gp-main">
+        <div class="gp-topbar">
+            <div class="gp-topbar-left">
+                <h1 class="gp-page-title">@GetPageTitle()</h1>
+            </div>
+            <div class="gp-topbar-right">
+                <AuthorizeView Context="authState">
+                    <Authorized>
+                        <div class="gp-topbar-user">
+                            <div class="gp-topbar-avatar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <span class="gp-topbar-name">@authState.User.Identity?.Name</span>
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login" class="gp-topbar-btn-primary">Sign in</a>
+                        <a href="/inscription" class="gp-topbar-btn-outline">Register</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
         </div>
 
-        <article class="content px-4">
+        <article class="gp-content">
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    private string GetPageTitle() => string.Empty;
+}

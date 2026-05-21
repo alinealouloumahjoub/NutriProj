@@ -1,5 +1,14 @@
 ﻿@page "/not-found"
 @layout MainLayout
 
-<h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:1rem;">
+    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ddeae1" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <h2 style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gp-text-dark);margin:0;">Page not found</h2>
+    <p style="color:var(--gp-text-muted);max-width:320px;">Sorry, the content you are looking for does not exist or has been moved.</p>
+    <a href="/recipes" class="gp-btn gp-btn-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Go to Recipes
+    </a>
+</div>

@@ -5,63 +5,86 @@
 @inject IIngredientService IngredientService
 @inject NavigationManager NavigationManager
 
-<h3>@(Id.HasValue ? "Edit Ingredient" : "New Ingredient")</h3>
+<PageTitle>@(Id.HasValue ? "Edit Ingredient" : "New Ingredient") — GreenPlate</PageTitle>
+
+<div class="gp-page-header">
+    <div>
+        <h2>@(Id.HasValue ? "Edit Ingredient" : "New Ingredient")</h2>
+        <p>@(Id.HasValue ? "Update ingredient details" : "Add a new ingredient to the pantry")</p>
+    </div>
+    <a href="/ingredients" class="gp-btn gp-btn-outline-gray">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back
+    </a>
+</div>
 
 @if (currentIngredient == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="gp-loading">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="gp-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        Loading...
+    </div>
 }
 else
 {
-    <EditForm Model="currentIngredient" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" />
+    <div class="gp-card" style="max-width:540px;">
+        <div class="gp-card-body">
+            <EditForm Model="currentIngredient" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="gp-alert gp-alert-danger" />
 
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <InputText @bind-Value="currentIngredient.NameIng" class="form-control" />
-            <ValidationMessage For="@(() => currentIngredient.NameIng)" class="text-danger" />
+                <div class="mb-4">
+                    <label class="gp-form-label">Ingredient Name</label>
+                    <InputText @bind-Value="currentIngredient.NameIng" class="gp-form-control" placeholder="e.g. Chickpeas" />
+                    <ValidationMessage For="@(() => currentIngredient.NameIng)" class="gp-alert gp-alert-danger" style="padding:0.4rem 0.75rem;margin-top:0.375rem;" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="gp-form-label">Calories per 100g</label>
+                    <InputNumber @bind-Value="currentIngredient.CaloriesPer100g" class="gp-form-control" placeholder="0" />
+                    <ValidationMessage For="@(() => currentIngredient.CaloriesPer100g)" class="gp-alert gp-alert-danger" style="padding:0.4rem 0.75rem;margin-top:0.375rem;" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="gp-form-label">Image (optional)</label>
+                    <InputFile OnChange="HandleImageUpload" class="gp-form-control" accept="image/*" style="padding:0.5rem;" />
+                    @if (!string.IsNullOrEmpty(currentIngredient.ImagePath))
+                    {
+                        <img src="@currentIngredient.ImagePath" class="mt-2 rounded" style="height:90px;border:1px solid var(--gp-green-border);border-radius:8px;" />
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="gp-alert gp-alert-danger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        @errorMessage
+                    </div>
+                }
+
+                <div style="display:flex;justify-content:flex-end;gap:0.625rem;margin-top:0.5rem;">
+                    <a href="/ingredients" class="gp-btn gp-btn-outline-gray">Cancel</a>
+                    <button type="submit" class="gp-btn gp-btn-green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Save Ingredient
+                    </button>
+                </div>
+            </EditForm>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Calories per 100g</label>
-            <InputNumber @bind-Value="currentIngredient.CaloriesPer100g" class="form-control" />
-            <ValidationMessage For="@(() => currentIngredient.CaloriesPer100g)" class="text-danger" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Image</label>
-            @* InputFile is not in professor's code — needed for picture upload *@
-            <InputFile OnChange="HandleImageUpload" class="form-control" accept="image/*" />
-            @if (!string.IsNullOrEmpty(currentIngredient.ImagePath))
-            {
-                <img src="@currentIngredient.ImagePath" class="mt-2 rounded" style="height:100px;" />
-            }
-        </div>
-
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger">@errorMessage</div>
-        }
-
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/ingredients" class="btn btn-secondary ms-2">Cancel</a>
-    </EditForm>
+    </div>
 }
 
 @code {
-    [Parameter]
-    public int? Id { get; set; }
+    [Parameter] public int? Id { get; set; }
     private Ingredient? currentIngredient;
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        if (Id.HasValue)
-            currentIngredient = await IngredientService.GetIngredientById(Id.Value);
-
-        if (currentIngredient == null)
-            currentIngredient = new Ingredient();
+        currentIngredient = Id.HasValue
+            ? await IngredientService.GetIngredientById(Id.Value)
+            : new Ingredient();
+        currentIngredient ??= new Ingredient();
     }
 
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
@@ -80,16 +103,10 @@ else
     {
         try
         {
-            if (Id.HasValue)
-                await IngredientService.UpdateIngredient(currentIngredient!);
-            else
-                await IngredientService.AddIngredient(currentIngredient!);
-
+            if (Id.HasValue) await IngredientService.UpdateIngredient(currentIngredient!);
+            else             await IngredientService.AddIngredient(currentIngredient!);
             NavigationManager.NavigateTo("/ingredients");
         }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
+        catch (Exception ex) { errorMessage = ex.Message; }
     }
 }
